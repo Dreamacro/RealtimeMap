@@ -1,0 +1,30 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", "Heiti SC", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti, SimSun, sans-serif;
+    margin: 0;
+    background: #000;
+}
+
+.list {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.info {
+    display: flex;
+    color: #FFF;
+    height: 240px;
+    width: 100%;
+    table {
+        display: block;
+        min-width: 300px;
+        flex: 1;
+        th {
+            min-width: 150px;
+            text-align: left;
+        }
+    }
+    .realtime {
+        flex: 2;
+    }
+}
