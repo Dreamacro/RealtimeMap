@@ -5,6 +5,7 @@ let map = new Map({
     width: screen.width,
     worldmap: worldmap
 });
+
 let list = document.querySelector('.list');
 
 let origin = {},
@@ -41,4 +42,9 @@ ws.onmessage = function(e) {
         list);
 
     map.trigger(start, end);
+};
+
+ws.onerror = function (e) {
+    alert('WebSocket发生异常，请重新刷新网页。');
+    console.log(e);
 };

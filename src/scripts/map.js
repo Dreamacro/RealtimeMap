@@ -13,7 +13,9 @@ class Map {
 
         this.ctx.drawSvg('world.svg', 0, 0, this.WIDTH, this.HEIGHT);
         this.mapDate = this.ctx.getImageData(0, 0, this.WIDTH,this.HEIGHT);
+
         this.container = {};
+        this.count = 0;// queue总数
 
         this.particles = {}
         this.particle = (() => {
@@ -33,7 +35,6 @@ class Map {
             };
           };
         })();
-        this.count = 0;// queue总数
     }
 
     /**
@@ -49,7 +50,7 @@ class Map {
               startColor = '#21b384',
               endColor = '#e32528',
               particleColor = '#F8BD19';
-        if(this.container[timestamp]) return;// 无奈
+        if(this.container[timestamp]) return;
         let info = {
             start: start,
             end: end,
@@ -85,7 +86,7 @@ class Map {
         for(let key of Object.keys(this.particles)) {
             let p = this.particles[key];
             this.ctx.beginPath();
-            this.ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            this.ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
             this.ctx.globalAlpha = p.o;
             this.ctx.fillStyle = p.c;
             this.ctx.fill();
@@ -96,14 +97,14 @@ class Map {
             if(p.r < 0 || p.o < 0) delete this.particles[p.index];
         }
 
-        // fireballs
+        // fireballs and circle
         for(let key of Object.keys(this.container)) {
             const time = now - key;
             const info = this.container[key];
             if(time < info.duration) {
                 const r = this.easeOutQuint(time, 0, info.radius, info.duration);
-                const offsetx = info.start.x + time / info.duration * (info.end.x - info.start.x); //this.easeOutQuint(time, info.start.x, info.end.x - info.start.x, info.duration);
-                const offsety = info.start.y + time / info.duration * (info.end.y - info.start.y);//this.easeOutQuint(time, info.start.y, info.end.y - info.start.y, info.duration);
+                const offsetx = info.start.x + time / info.duration * (info.end.x - info.start.x);
+                const offsety = info.start.y + time / info.duration * (info.end.y - info.start.y);
                 const opacity = this.easeOutQuint(time, 1, -1, info.duration);
 
                 // circle
@@ -114,11 +115,11 @@ class Map {
                 this.ctx.arc(info.start.x, info.start.y, r, 0, 2*Math.PI);
                 this.ctx.stroke();
 
-                let numParticles = Math.sqrt(info.xv*info.xv+info.yv*info.yv)/5;
-                if(numParticles<1)numParticles=1;
+                let numParticles = Math.sqrt(info.xv*info.xv + info.yv*info.yv) / 5;
+                if(numParticles < 1) numParticles = 1;
                 let numParticlesInt = Math.ceil(numParticles),
-                    numParticlesDif = numParticles/numParticlesInt;
-                for(let j=0;j<numParticlesInt;j++) {
+                    numParticlesDif = numParticles / numParticlesInt;
+                for(let j = 0; j < numParticlesInt; j++) {
                   this.particle(
                     offsetx-info.xv*j/numParticlesInt,
                     offsety-info.yv*j/numParticlesInt,
@@ -147,6 +148,7 @@ class Map {
                 this.count--;
             }
         }
+
         if(this.count) {
             window.requestAnimationFrame(this.draw.bind(this));
         }
