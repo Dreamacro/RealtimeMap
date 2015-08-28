@@ -1,47 +1,19 @@
 'use strict';
 class Map {
     constructor(option) {
-        this.scale = option.width / 1000;
-        this.svg = this.createSVGElement('svg', {
-            width: option.width,
-            height: option.height
-        });
-        option.container.appendChild(this.svg);
-        for (let country of Object.keys(option.worldmap.shapes)) {
-            const path = this.createSVGElement('path', {
-                stroke: "#ccc6ae",
-                fill: "#000",
-                d: option.worldmap.shapes[country],
-                transform: `scale(${ this.scale })`
-            });
-            this.svg.appendChild(path);
-        }
+        this.WIDTH = option.width;
+        this.HEIGHT = option.width * 0.4;
+        this.scale = this.WIDTH / 1000;
 
+        this.canvas = document.createElement('canvas');
+        option.container.appendChild(this.canvas);
+        this.canvas.width = this.WIDTH;
+        this.canvas.height = this.HEIGHT;
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.drawSvg('world.svg', 0, 0, this.WIDTH, this.HEIGHT);
+        this.mapDate = this.ctx.getImageData(0,0,this.WIDTH,this.HEIGHT);
         this.container = {};
         this.count = 0;// queue总数
-    }
-
-    /**
-     * SVGElement
-     * @param  {String} name
-     * @param  {Object} attr
-     * @return {Element}
-     */
-    createSVGElement(name, attr) {
-        let ele =  document.createElementNS('http://www.w3.org/2000/svg', name);
-        return this.setAttr(ele, attr);
-    }
-
-    /**
-     * set attr
-     * @param {Element} ele
-     * @param {Object} attr
-     */
-    setAttr(ele, attr) {
-        for(let key of Object.keys(attr)) {
-            ele.setAttribute(key, attr[key]);
-        }
-        return ele;
     }
 
     /**
@@ -57,45 +29,11 @@ class Map {
         const startColor = '#21b384';
         const endColor = '#e32528';
         if(this.container[timestamp]) return;// 无奈
-        let option = {
-            'stroke-width': 2,
-            'fill:': 'none',
-            r: 0,
-            opacity: 1
-        }
-        let startCircle = this.createSVGElement('circle', option);
-        let endCircle = this.createSVGElement('circle', option);
-        option = {
-            stroke: endColor,
-            'stroke-width': 5,
-            opacity: 0.5,
-            'stroke-linecap': 'round',
-            d: `M${ start.cx } ${ start.cy } L${ end.cx } ${ end.cy }`
-        }
-        let line = this.createSVGElement('path', option);
-        const totalLength = line.getTotalLength();
-        this.setAttr(line, {
-            'stroke-dasharray': totalLength,
-            'stroke-dashoffset': totalLength
-        });
-        this.setAttr(startCircle, {
-            stroke: startColor,
-            cx: start.cx,
-            cy: start.cy
-        });
-        this.setAttr(endCircle, {
-            stroke: endColor,
-            cx: end.cx,
-            cy: end.cy
-        });
-        this.svg.appendChild(startCircle);
-        this.svg.appendChild(endCircle);
-        this.svg.appendChild(line);
         let info = {
-            startCircle: startCircle,
-            endCircle: endCircle,
-            path: line,
-            totalLength: totalLength,
+            start: start,
+            end: end,
+            startColor: startColor,
+            endColor: endColor,
             duration: 1000,
             radius: 70 + parseInt(Math.random() * 20),
             stage: 0
@@ -106,40 +44,65 @@ class Map {
         }
     }
 
+    clear() {
+        this.ctx.clearRect(0,0,this.WIDTH,this.HEIGHT);
+        this.ctx.putImageData(this.mapDate, 0, 0);
+    }
+
     /**
      * 渲染
      * @return {null}
      */
     draw() {
         const now = +new Date;
+        this.clear();
         for(let key of Object.keys(this.container)) {
             const time = now - key;
             const info = this.container[key];
             if(time < info.duration) {
                 const r = this.easeOutQuint(time, 0, info.radius, info.duration);
-                const dashoffset = this.easeOutQuint(time, info.totalLength, -2 * info.totalLength, info.duration);
+                const offsetx = this.easeOutQuint(time > info.duration / 2 ? time - info.duration / 2 : time , info.start.x, info.end.x - info.start.x, info.duration / 2);
+                const offsety = this.easeOutQuint(time > info.duration / 2 ? time - info.duration / 2 : time, info.start.y, info.end.y - info.start.y, info.duration / 2);
                 const opacity = this.easeOutQuint(time, 1, -1, info.duration);
-                this.setAttr(info.startCircle, {
-                    r: r,
-                    opacity: opacity
-                });
-                this.setAttr(info.path, {
-                    'stroke-dashoffset': dashoffset
-                });
+
+                // circle
+                this.ctx.globalAlpha = opacity;
+                this.ctx.strokeStyle = info.startColor;
+                this.ctx.lineWidth = 5;
+                this.ctx.beginPath();
+                this.ctx.arc(info.start.x, info.start.y, r, 0, 2*Math.PI);
+                this.ctx.stroke();
+
+                // line
+                this.ctx.globalAlpha = 0.5;
+                this.ctx.strokeStyle = info.endColor;
+                this.ctx.beginPath();
+                time < info.duration / 2 ? this.ctx.moveTo(info.start.x, info.start.y) : this.ctx.moveTo(info.end.x, info.end.y);
+                //this.ctx.moveTo(info.start.x, info.start.y);
+                this.ctx.lineTo(offsetx, offsety);
+                this.ctx.stroke();
             } else if(time < info.duration * 2) {
-                if(info.stage === 0) {
-                    this.svg.removeChild(info.startCircle);
-                    this.svg.removeChild(info.path);
-                    info.stage = 1;
-                }
                 const r = this.easeOutQuint(time - info.duration, 0, info.radius, info.duration);
+                const offsetx = this.easeOutQuint(time - info.duration, info.start.x, info.end.x - info.start.x, info.duration);
+                const offsety = this.easeOutQuint(time - info.duration, info.start.y, info.end.y - info.start.y, info.duration);
                 const opacity = this.easeOutQuint(time - info.duration, 1, -1, info.duration);
-                this.setAttr(info.endCircle, {
-                    r: r,
-                    opacity: opacity
-                });
+
+                // circle
+                this.ctx.globalAlpha = opacity;
+                this.ctx.strokeStyle = info.endColor;
+                this.ctx.lineWidth = 5;
+                this.ctx.beginPath();
+                this.ctx.arc(info.end.x, info.end.y, r, 0, 2*Math.PI);
+                this.ctx.stroke();
+
+                // // line
+                // this.ctx.globalAlpha = 0.5;
+                // this.ctx.strokeStyle = info.endColor;
+                // this.ctx.beginPath();
+                // this.ctx.moveTo(info.end.x, info.end.y);
+                // this.ctx.lineTo(offsetx, offsety);
+                // this.ctx.stroke();
             } else {
-                this.svg.removeChild(info.endCircle);
                 delete this.container[key];
                 this.count--;
             }
@@ -156,8 +119,8 @@ class Map {
      */
     getXY (option) {
         return {
-            cx: (option.lon * 2.6938 + 465.4) * this.scale,
-            cy: (option.lat * -2.6938 + 227.066) * this.scale
+            x: (option.lon * 2.6938 + 465.4) * this.scale,
+            y: (option.lat * -2.6938 + 227.066) * this.scale
         };
     };
 

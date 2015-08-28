@@ -3,7 +3,6 @@
 let map = new Map({
     container: document.querySelector('.map'),
     width: screen.width,
-    height: screen.width * 0.4,
     worldmap: worldmap
 });
 let list = document.querySelector('.list');
