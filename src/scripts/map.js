@@ -59,9 +59,8 @@ class Map {
             particleColor: particleColor,
             duration: 1000,
             radius: 70 + parseInt(Math.random() * 20),
-            stage: 0,
-            xv: (start.x - end.x) / 500,
-            yv: (start.y - end.y) / 500
+            xv: (start.x - end.x) * 0.02,
+            yv: (start.y - end.y) * 0.02
         }
         this.container[timestamp] = info;
         if(!(this.count)++) {
@@ -126,8 +125,8 @@ class Map {
                     7,
                     numParticlesDif,
                     info.particleColor,
-                    Math.random()*0.6,
-                    Math.random()*0.6,
+                    Math.random()*0.6-0.3,
+                    Math.random()*0.6-0.3,
                     -0.3,
                     -0.05*numParticlesDif
                   );
