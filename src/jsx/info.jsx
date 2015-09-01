@@ -11,8 +11,8 @@ class AttackList extends React.Component {
         return (
             <table className={ this.props.className }>
                 <tr>
+                  <th>#</th>
                   <th>{ this.props.className == 'attackorigin' ? 'Origin' : 'Targets' }</th>
-                  <th>Count</th>
                 </tr>
                 {
                     country
@@ -21,8 +21,8 @@ class AttackList extends React.Component {
                         .map((item) => {
                             return (
                                 <tr>
-                                  <td>{ item.country }</td>
                                   <td>{ item.count }</td>
+                                  <td>{ item.country }</td>
                                 </tr>
                             );
                         })
@@ -37,19 +37,33 @@ class RealTimeList extends React.Component {
 
         return (
             <table className={ this.props.className }>
-                <tr>
-                  <th>Time</th>
-                  <th>Origin</th>
-                  <th>Targets</th>
-                  <th>Type</th>
-                </tr>
+                <tbody>
+                    <tr className="first-head">
+                      <th>Timestamp</th>
+                      <th colSpan="3">Attacker</th>
+                      <th>Target</th>
+                      <th colSpan="2">Type</th>
+                    </tr>
+                    <tr>
+                      <th width="200px"></th>
+                      <th width="280px">Origin</th>
+                      <th width="240px">Location</th>
+                      <th width="160px">IP</th>
+                      <th width="200px">Location</th>
+                      <th width="100px">Service</th>
+                      <th>Port</th>
+                    </tr>
+                </tbody>
                 { this.props.realtime.map((item) => {
                     return (
                         <tr>
-                          <td width="200">{ item.Time }</td>
-                          <td>{ item.Origin }</td>
-                          <td width="200">{ item.Targets }</td>
-                          <td>{ item.Type }</td>
+                          <td>{ item.Time }</td>
+                          <td>{ item.Origin.org }</td>
+                          <td>{ item.Origin.location }</td>
+                          <td>{ item.Origin.ip }</td>
+                          <td>{ item.Targets }</td>
+                          <td>{ item.Type.service }</td>
+                          <td>{ item.Type.port }</td>
                         </tr>
                     );
                 }) }

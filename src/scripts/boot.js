@@ -30,9 +30,16 @@ ws.onmessage = function(e) {
 
     realtime.push({
         Time: new Date().toLocaleString(),
-        Origin: oriCountry,
+        Origin: {
+            org: data['org'],
+            location: data['city'] + ',' + oriCountry,
+            ip: data['md5']
+        },
         Targets: tarCountry,
-        Type: services[data['dport']] || 'Unknow'
+        Type: {
+            service: data['svc'],
+            port: data['dport']
+        }
     });
 
     if(realtime.length > 8) realtime.shift();

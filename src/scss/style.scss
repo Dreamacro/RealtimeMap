@@ -1,3 +1,5 @@
+$tableColor: rgba(46, 46, 46, 0.5);
+
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", "Heiti SC", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti, SimSun, sans-serif;
     margin: 0;
@@ -5,26 +7,56 @@ body {
 }
 
 .list {
-    position: fixed;
-    bottom: 0;
     width: 100%;
 }
 
 .info {
-    display: flex;
     color: #FFF;
-    height: 240px;
     width: 100%;
     table {
         display: block;
-        min-width: 300px;
-        flex: 1;
+        border-radius: 6px;
+        background-color: $tableColor;
         th {
-            min-width: 150px;
             text-align: left;
         }
     }
     .realtime {
-        flex: 2;
+        position: absolute;
+        padding: 0 10px;
+        bottom: 20px;
+        left: 20px;
+        height: 240px;
+        table-layout: fixed;
+        .first-head th {
+            text-align: center;
+            font-size: 18px;
+        }
+        td {
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
+        }
     }
+    .attackorigin,
+    .attacktargets {
+        position: absolute;
+        bottom: 300px;
+        min-width: 235px;
+        th:first-child {
+            min-width: 40px;
+        }
+        th:first-child,
+        td:first-child {
+            text-align: right;
+        }
+        th:nth-child(2),
+        td:nth-child(2) {
+            text-indent: 5px;
+        }
+    }
+    .attacktargets { right: 0; }
+    .attackorigin { left: 0; }
 }
